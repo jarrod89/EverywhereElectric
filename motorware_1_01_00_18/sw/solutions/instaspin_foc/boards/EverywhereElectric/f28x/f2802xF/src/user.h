@@ -365,7 +365,7 @@ extern "C" {
 //! \brief These motor ID settings and motor parameters are then available to be used by the control system
 //! \brief Once your ideal settings and parameters are identified update the motor section here so it is available in the binary code
 //#define USER_MOTOR Estun_EMJ_04APB22
-#define USER_MOTOR Anaheim_BLY172S
+//#define USER_MOTOR Anaheim_BLY172S
 //#define USER_MOTOR hobby_3p5T
 //#define USER_MOTOR hobby_4p5T
 //#define USER_MOTOR My_Motor
@@ -665,6 +665,13 @@ v/hz=0.2976 .297 .29
 #define USER_MOTOR_IND_EST_CURRENT      (-0.2)
 #define USER_MOTOR_MAX_CURRENT          (15.0)
 #define USER_MOTOR_FLUX_EST_FREQ_Hz     (50.0)
+
+#define USER_MOTOR_FREQ_LOW               (10.0)          // Hz - suggested to set to 10% of rated motor frequency
+#define USER_MOTOR_FREQ_HIGH            (100.0)         // Hz - suggested to set to 100% of rated motor frequency
+#define USER_MOTOR_FREQ_MAX             (120.0)         // Hz - suggested to set to 120% of rated motor frequency
+#define USER_MOTOR_VOLT_MIN             (3.0)           // Volt - suggested to set to 15% of rated motor voltage
+#define USER_MOTOR_VOLT_MAX             (18.0)          // Volt - suggested to set to 100% of rated motor voltage
+
 
 #elif (USER_MOTOR == steeringpump)
 #define USER_MOTOR_TYPE                 MOTOR_Type_Pm

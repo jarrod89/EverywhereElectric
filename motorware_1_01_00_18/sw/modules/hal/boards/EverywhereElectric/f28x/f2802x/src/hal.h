@@ -151,8 +151,8 @@ typedef enum
 
  typedef enum
 {
-  HAL_Gpio_LED1 = GPIO_Number_12
-  HAL_Gpio_LED2 = GPIO_Number_16
+  HAL_Gpio_LED1 = GPIO_Number_12,
+  HAL_Gpio_LED2 = GPIO_Number_16,
   HAL_Gpio_LED3 = GPIO_Number_19
 } HAL_Gpio_LED_e; 
 
