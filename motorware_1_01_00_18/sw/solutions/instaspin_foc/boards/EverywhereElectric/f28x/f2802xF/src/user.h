@@ -75,7 +75,7 @@ extern "C" {
 //! \brief Defines the full scale frequency for IQ variable, Hz
 //! \brief All frequencies are converted into (pu) based on the ratio to this value
 //! \brief this value MUST be larger than the maximum speed that you are expecting from the motor 
-#define USER_IQ_FULL_SCALE_FREQ_Hz        (650.0)   // 800 Example with buffer for 8-pole 6 KRPM motor to be run to 10 KRPM with field weakening; Hz =(RPM * Poles) / 120
+#define USER_IQ_FULL_SCALE_FREQ_Hz        (154.0)   // 800 Example with buffer for 8-pole 6 KRPM motor to be run to 10 KRPM with field weakening; Hz =(RPM * Poles) / 120
 
 //! \brief Defines full scale value for the IQ30 variable of Voltage inside the system
 //! \brief All voltages are converted into (pu) based on the ratio to this value
@@ -85,7 +85,7 @@ extern "C" {
 //! \brief WARNING: if you know the value of your Bemf constant, and you know you are operating at a multiple speed due to field weakening, be sure to set this value higher than the expected Bemf voltage
 //! \brief It is recommended to start with a value ~3x greater than the USER_ADC_FULL_SCALE_VOLTAGE_V and increase to 4-5x if scenarios where a Bemf calculation may exceed these limits
 //! \brief This value is also used to calculate the minimum flux value: USER_IQ_FULL_SCALE_VOLTAGE_V/USER_EST_FREQ_Hz/0.7
-#define USER_IQ_FULL_SCALE_VOLTAGE_V      (51.0)   // 24.0 Example for boostxldrv8301_revB typical usage and the Anaheim motor
+#define USER_IQ_FULL_SCALE_VOLTAGE_V      (50.0)   // 24.0 Example for boostxldrv8301_revB typical usage and the Anaheim motor
 
 //! \brief Defines the maximum voltage at the input to the AD converter
 //! \brief The value that will be represented by the maximum ADC input (3.3V) and conversion (0FFFh)
@@ -259,7 +259,7 @@ extern "C" {
 
 //! \brief Defines maximum acceleration for the estimation speed profiles, Hz/s
 //! \brief Only used during Motor ID (commission)
-#define USER_MAX_ACCEL_EST_Hzps           (5.0)         // 5.0 Default, don't change
+#define USER_MAX_ACCEL_EST_Hzps           (6.0)         // 5.0 Default, don't change
 
 //! \brief Defines the maximum current slope for Id trajectory during estimation
 #define USER_MAX_CURRENT_SLOPE           (USER_MOTOR_RES_EST_CURRENT/USER_IQ_FULL_SCALE_CURRENT_A/USER_TRAJ_FREQ_Hz)      // USER_MOTOR_RES_EST_CURRENT/USER_IQ_FULL_SCALE_CURRENT_A/USER_TRAJ_FREQ_Hz Default, don't change
@@ -291,7 +291,7 @@ extern "C" {
 //! \brief Defines the R/L estimation frequency, Hz
 //! \brief User higher values for low inductance motors and lower values for higher inductance
 //! \brief motors.  The values can range from 100 to 300 Hz.
-#define USER_R_OVER_L_EST_FREQ_Hz 			(300)               // 300 Default
+#define USER_R_OVER_L_EST_FREQ_Hz 			(100)               // 300 Default
 
 
 //! \brief POLES
@@ -351,6 +351,7 @@ extern "C" {
 #define Zytek55kW					119
 #define leafmotor					120
 #define steeringpump				121
+#define Kia_HSM_8kW                 122
 // IPM motors
 // If user provides separate Ls-d, Ls-q
 // else treat as SPM with user or identified average Ls
@@ -380,7 +381,7 @@ extern "C" {
 //#define USER_MOTOR medical_instrument
 //#define USER_MOTOR Kinetek_YDQ1p3_4
 //#define USER_MOTOR LPKF_CAD_CAM
-#define USER_MOTOR leafmotor
+#define USER_MOTOR Kia_HSM_8kW
 
 
 #if (USER_MOTOR == Estun_EMJ_04APB22)                  // Name must match the motor #define
@@ -651,26 +652,42 @@ L=606.47uH 0.00060647 .000220 .00057
 R=0.01356 .027 .03
 v/hz=0.2976 .297 .29
 */
+#elif (USER_MOTOR == Kia_HSM_8kW)
+#define USER_MOTOR_TYPE                MOTOR_Type_Pm
+#define USER_MOTOR_NUM_POLE_PAIRS       (6)
+#define USER_MOTOR_Rr                   (NULL)
+#define USER_MOTOR_Rs                   (0.044)
+#define USER_MOTOR_Ls_d                 (0.00052)
+#define USER_MOTOR_Ls_q                 (USER_MOTOR_Ls_d)
+#define USER_MOTOR_RATED_FLUX           (0.34)
+#define USER_MOTOR_MAGNETIZING_CURRENT  (NULL)
+#define USER_MOTOR_RES_EST_CURRENT      (2.0)
+#define USER_MOTOR_IND_EST_CURRENT      (-0.5)
+#define USER_MOTOR_MAX_CURRENT          (20.0)
+#define USER_MOTOR_FLUX_EST_FREQ_Hz     (14.0)
 
 #elif (USER_MOTOR == leafmotor)
 #define USER_MOTOR_TYPE                 MOTOR_Type_Pm
 #define USER_MOTOR_NUM_POLE_PAIRS       (7)
 #define USER_MOTOR_Rr                   (NULL)
-#define USER_MOTOR_Rs                   (0.0719)
-#define USER_MOTOR_Ls_d                 (0.0001366)
+#define USER_MOTOR_Rs                   (0.03634)
+//(0.0719)
+#define USER_MOTOR_Ls_d                 (0.00007408)
+//(0.0001366)
 #define USER_MOTOR_Ls_q                 (USER_MOTOR_Ls_d)
-#define USER_MOTOR_RATED_FLUX           (0.12287)
+#define USER_MOTOR_RATED_FLUX           (0.1224)
+//(0.12287)
 #define USER_MOTOR_MAGNETIZING_CURRENT  (NULL)
-#define USER_MOTOR_RES_EST_CURRENT      (1.0)
-#define USER_MOTOR_IND_EST_CURRENT      (-0.2)
+#define USER_MOTOR_RES_EST_CURRENT      (4.0)
+#define USER_MOTOR_IND_EST_CURRENT      (-1)
 #define USER_MOTOR_MAX_CURRENT          (15.0)
-#define USER_MOTOR_FLUX_EST_FREQ_Hz     (50.0)
+#define USER_MOTOR_FLUX_EST_FREQ_Hz     (20.0)
 
-#define USER_MOTOR_FREQ_LOW               (10.0)          // Hz - suggested to set to 10% of rated motor frequency
-#define USER_MOTOR_FREQ_HIGH            (100.0)         // Hz - suggested to set to 100% of rated motor frequency
-#define USER_MOTOR_FREQ_MAX             (120.0)         // Hz - suggested to set to 120% of rated motor frequency
-#define USER_MOTOR_VOLT_MIN             (3.0)           // Volt - suggested to set to 15% of rated motor voltage
-#define USER_MOTOR_VOLT_MAX             (18.0)          // Volt - suggested to set to 100% of rated motor voltage
+#define USER_MOTOR_FREQ_LOW               (20.0)          // Hz - suggested to set to 10% of rated motor frequency
+#define USER_MOTOR_FREQ_HIGH            (200.0)         // Hz - suggested to set to 100% of rated motor frequency
+#define USER_MOTOR_FREQ_MAX             (240.0)         // Hz - suggested to set to 120% of rated motor frequency
+#define USER_MOTOR_VOLT_MIN             (1.0)           // Volt - suggested to set to 15% of rated motor voltage
+#define USER_MOTOR_VOLT_MAX             (24.0)          // Volt - suggested to set to 100% of rated motor voltage
 
 
 #elif (USER_MOTOR == steeringpump)
