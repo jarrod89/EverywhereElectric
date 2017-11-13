@@ -159,6 +159,7 @@ _iq gSpeed_krpm_to_pu_sf = _IQ((float_t)USER_MOTOR_NUM_POLE_PAIRS * 1000.0
 _iq gSpeed_hz_to_krpm_sf = _IQ(60.0 / (float_t)USER_MOTOR_NUM_POLE_PAIRS
             / 1000.0);
 
+_iq gPotentiometer = _IQ(0.0);
 // **************************************************************************
 // the functions
 void main(void)
@@ -441,6 +442,7 @@ void main(void)
 
     // enable the system by default
     gMotorVars.Flag_enableSys = true;
+	gMotorVars.Flag_Run_Identify = true;
 
     #ifdef DRV8301_SPI
         // turn on the DRV8301 if present
@@ -509,7 +511,8 @@ void main(void)
                     gMotorVars.Flag_enableForceAngle);
 
             // set target speed
-            gMotorVars.SpeedRef_pu = _IQmpy(gMotorVars.SpeedRef_krpm,
+			gPotentiometer = HAL_readPotentiometerData(halHandle);
+            gMotorVars.SpeedRef_pu = gPotentiometer;//_IQmpy(gMotorVars.SpeedRef_krpm,
                     gSpeed_krpm_to_pu_sf);
 
             #ifdef DRV8301_SPI

@@ -149,6 +149,11 @@ typedef enum
   HAL_Gpio_drv_en = GPIO_Number_6
 } HAL_Gpio_drv_en_e;
 
+typedef enum
+{
+  HAL_Gpio_OCP = GPIO_Number_7
+} HAL_Gpio_OCP_e;
+
  typedef enum
 {
   HAL_Gpio_LED1 = GPIO_Number_12,
