@@ -100,7 +100,7 @@ extern "C" {
 //! \brief All currents are converted into (pu) based on the ratio to this value
 //! \brief WARNING: this value MUST be larger than the maximum current readings that you are expecting from the motor or the reading will roll over to 0, creating a control issue 
 //peak value. must be >=USER_ADC_FULL_SCALE_CURRENT_A / 2
-#define USER_IQ_FULL_SCALE_CURRENT_A         (62.0) // 20.0 Example for boostxldrv8301_revB typical usage
+#define USER_IQ_FULL_SCALE_CURRENT_A         (80.0) // 20.0 Example for boostxldrv8301_revB typical usage
 
 //! \brief Defines the maximum current at the AD converter
 //! \brief The value that will be represented by the maximum ADC input (3.3V) and conversion (0FFFh)
@@ -381,7 +381,8 @@ extern "C" {
 //#define USER_MOTOR medical_instrument
 //#define USER_MOTOR Kinetek_YDQ1p3_4
 //#define USER_MOTOR LPKF_CAD_CAM
-#define USER_MOTOR Kia_HSM_8kW
+#define USER_MOTOR leafmotor
+//Kia_HSM_8kW
 
 
 #if (USER_MOTOR == Estun_EMJ_04APB22)                  // Name must match the motor #define
@@ -680,7 +681,7 @@ v/hz=0.2976 .297 .29
 #define USER_MOTOR_MAGNETIZING_CURRENT  (NULL)
 #define USER_MOTOR_RES_EST_CURRENT      (4.0)
 #define USER_MOTOR_IND_EST_CURRENT      (-1)
-#define USER_MOTOR_MAX_CURRENT          (15.0)
+#define USER_MOTOR_MAX_CURRENT          (USER_IQ_FULL_SCALE_CURRENT_A)
 #define USER_MOTOR_FLUX_EST_FREQ_Hz     (20.0)
 
 #define USER_MOTOR_FREQ_LOW               (20.0)          // Hz - suggested to set to 10% of rated motor frequency

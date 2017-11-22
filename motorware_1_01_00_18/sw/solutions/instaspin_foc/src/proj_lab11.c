@@ -408,7 +408,7 @@ void main(void)
     // USER_IQ_FULL_SCALE_FREQ_Hz.
     // Set 10 Hz electrical frequency as initial value, so the kRPM value would
     // be: 10 * 60 / motor pole pairs / 1000.
-    gMotorVars.SpeedRef_krpm = _IQmpy(_IQ(10.0),gSpeed_hz_to_krpm_sf);
+    gMotorVars.SpeedRef_krpm = _IQ(0.0);//_IQmpy(_IQ(10.0),gSpeed_hz_to_krpm_sf);
 
     // initialize the inverse Park module
     iparkHandle = IPARK_init(&ipark,sizeof(ipark));
@@ -442,6 +442,7 @@ void main(void)
 
     // enable the system by default
     gMotorVars.Flag_enableSys = true;
+    // Everywhere Electric mods:
 	gMotorVars.Flag_Run_Identify = true;
 
     #ifdef DRV8301_SPI
@@ -510,10 +511,18 @@ void main(void)
             EST_setFlag_enableForceAngle(estHandle,
                     gMotorVars.Flag_enableForceAngle);
 
-            // set target speed
-			gPotentiometer = HAL_readPotentiometerData(halHandle);
-            gMotorVars.SpeedRef_pu = gPotentiometer;//_IQmpy(gMotorVars.SpeedRef_krpm,
-                    gSpeed_krpm_to_pu_sf);
+            // Everywhere Electric mods:
+            // Under-voltage protection
+            if(gMotorVars.VdcBus_kV <= _IQ(2.1*8/1000)) //cutoff at 2.1V/cell
+            	gMotorVars.Flag_Run_Identify = false; //shut down inverter
+            // Read potentiometer// set target speed max=0.818, min=0.148
+			gPotentiometer = _IQmpy( ( HAL_readPotentiometerData(halHandle) - _IQ(0.1482) ), _IQ(1.0/(0.818-0.148)));
+			if(gPotentiometer > _IQ(1))
+				gPotentiometer = _IQ(1);
+			if(gPotentiometer < _IQ(0))
+				gPotentiometer = _IQ(0);
+			// set target speed
+            gMotorVars.SpeedRef_pu = gPotentiometer;//_IQmpy(gMotorVars.SpeedRef_krpm, gSpeed_krpm_to_pu_sf);
 
             #ifdef DRV8301_SPI
                 HAL_writeDrvData(halHandle,&gDrvSpi8301Vars);
@@ -601,8 +610,8 @@ interrupt void mainISR(void)
             // The next instruction executes the PI speed controller and places
             // its output in Idq_ref_pu.value[1], which is the input reference
             // value for the q-axis current controller.
-            PID_run_spd(pidHandle[0],gMotorVars.SpeedRef_pu,speed_pu,
-                    &(gIdq_ref_pu.value[1]));
+//            PID_run_spd(pidHandle[0],gMotorVars.SpeedRef_pu,speed_pu,&(gIdq_ref_pu.value[1]));
+            gIdq_ref_pu.value[1] = gMotorVars.SpeedRef_pu;
         }
         else
         {
