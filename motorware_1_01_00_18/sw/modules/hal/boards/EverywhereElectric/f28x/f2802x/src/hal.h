@@ -157,7 +157,7 @@ typedef enum
  typedef enum
 {
   HAL_Gpio_LED1 = GPIO_Number_12,
-  HAL_Gpio_LED2 = GPIO_Number_16,
+  HAL_Gpio_LED2 = GPIO_Number_17,
   HAL_Gpio_LED3 = GPIO_Number_19
 } HAL_Gpio_LED_e; 
 
@@ -318,6 +318,12 @@ static inline void HAL_enablePwm(HAL_Handle handle)
 } // end of HAL_enablePwm() function
 
 
+static inline bool HAL_get_OCP(HAL_Handle handle)
+{
+    HAL_Obj *obj = (HAL_Obj *)handle;
+    return(GPIO_read(obj->gpioHandle,(GPIO_Number_e)HAL_Gpio_OCP));
+}
+extern bool HAL_get_OCP(HAL_Handle handle);
 //! \brief     Enables the PWM interrupt
 //! \param[in] handle  The hardware abstraction layer (HAL) handle
 extern void HAL_enablePwmInt(HAL_Handle handle);

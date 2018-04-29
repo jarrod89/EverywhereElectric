@@ -159,7 +159,13 @@ _iq gSpeed_krpm_to_pu_sf = _IQ((float_t)USER_MOTOR_NUM_POLE_PAIRS * 1000.0
 _iq gSpeed_hz_to_krpm_sf = _IQ(60.0 / (float_t)USER_MOTOR_NUM_POLE_PAIRS
             / 1000.0);
 
+//Everywhere Electric variables
 _iq gPotentiometer = _IQ(0.0);
+unsigned int faultFlags = 0;
+#define NOFAULT 0
+#define UVP 1
+#define OCP 2
+unsigned int UVPctr=1;
 // **************************************************************************
 // the functions
 void main(void)
@@ -485,6 +491,7 @@ void main(void)
 
                 // enable the PWM
                 HAL_enablePwm(halHandle);
+                HAL_setGpioHigh(halHandle,HAL_Gpio_LED1);
             }
             else  // Flag_enableSys is set AND Flag_Run_Identify is not set
             {
@@ -502,6 +509,8 @@ void main(void)
                 // clear Id and Iq references
                 gIdq_ref_pu.value[0] = _IQ(0.0);
                 gIdq_ref_pu.value[1] = _IQ(0.0);
+
+                HAL_setGpioLow(halHandle,HAL_Gpio_LED1);
             }
 
             // update the global variables
@@ -512,11 +521,30 @@ void main(void)
                     gMotorVars.Flag_enableForceAngle);
 
             // Everywhere Electric mods:
+            if(HAL_get_OCP(halHandle))
+            {
+                faultFlags |= OCP;
+                gMotorVars.Flag_Run_Identify = false;
+            }
             // Under-voltage protection
-            if(gMotorVars.VdcBus_kV <= _IQ(2.1*8/1000)) //cutoff at 2.1V/cell
-            	gMotorVars.Flag_Run_Identify = false; //shut down inverter
+            if(gMotorVars.VdcBus_kV < _IQ(3.0*14/1000)) //cutoff at 3V/cell
+            {
+                HAL_setGpioHigh(halHandle,HAL_Gpio_LED2);
+                if(UVPctr)
+                    UVPctr--; //simple filter
+            }else
+            {
+                HAL_setGpioLow(halHandle,HAL_Gpio_LED2);
+                UVPctr = 100;
+            }
+
+            if(UVPctr==0)
+            {
+                faultFlags |= UVP;
+                gMotorVars.Flag_Run_Identify = false; //shut down inverter
+            }
             // Read potentiometer// set target speed max=0.818, min=0.148
-			gPotentiometer = _IQmpy( ( HAL_readPotentiometerData(halHandle) - _IQ(0.1482) ), _IQ(1.0/(0.818-0.148)));
+			gPotentiometer = _IQmpy( ( HAL_readPotentiometerData(halHandle) /*),_IQ(1.0));*/- _IQ(0.154) ), _IQ((USER_MOTOR_MAX_CURRENT / USER_IQ_FULL_SCALE_CURRENT_A)/(0.824-0.154))); //re scale to remove deadbands in throttle sensor
 			if(gPotentiometer > _IQ(1))
 				gPotentiometer = _IQ(1);
 			if(gPotentiometer < _IQ(0))
@@ -611,7 +639,7 @@ interrupt void mainISR(void)
             // its output in Idq_ref_pu.value[1], which is the input reference
             // value for the q-axis current controller.
 //            PID_run_spd(pidHandle[0],gMotorVars.SpeedRef_pu,speed_pu,&(gIdq_ref_pu.value[1]));
-            gIdq_ref_pu.value[1] = gMotorVars.SpeedRef_pu;
+            gIdq_ref_pu.value[1] = gMotorVars.SpeedRef_pu; //removed speed controller, use direct torque control
         }
         else
         {

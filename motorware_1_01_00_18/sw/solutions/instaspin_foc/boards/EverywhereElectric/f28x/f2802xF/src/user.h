@@ -75,7 +75,7 @@ extern "C" {
 //! \brief Defines the full scale frequency for IQ variable, Hz
 //! \brief All frequencies are converted into (pu) based on the ratio to this value
 //! \brief this value MUST be larger than the maximum speed that you are expecting from the motor 
-#define USER_IQ_FULL_SCALE_FREQ_Hz        (154.0)   // 800 Example with buffer for 8-pole 6 KRPM motor to be run to 10 KRPM with field weakening; Hz =(RPM * Poles) / 120
+#define USER_IQ_FULL_SCALE_FREQ_Hz        (450.0)   // 800 Example with buffer for 8-pole 6 KRPM motor to be run to 10 KRPM with field weakening; Hz =(RPM * Poles) / 120
 
 //! \brief Defines full scale value for the IQ30 variable of Voltage inside the system
 //! \brief All voltages are converted into (pu) based on the ratio to this value
@@ -85,12 +85,12 @@ extern "C" {
 //! \brief WARNING: if you know the value of your Bemf constant, and you know you are operating at a multiple speed due to field weakening, be sure to set this value higher than the expected Bemf voltage
 //! \brief It is recommended to start with a value ~3x greater than the USER_ADC_FULL_SCALE_VOLTAGE_V and increase to 4-5x if scenarios where a Bemf calculation may exceed these limits
 //! \brief This value is also used to calculate the minimum flux value: USER_IQ_FULL_SCALE_VOLTAGE_V/USER_EST_FREQ_Hz/0.7
-#define USER_IQ_FULL_SCALE_VOLTAGE_V      (50.0)   // 24.0 Example for boostxldrv8301_revB typical usage and the Anaheim motor
+#define USER_IQ_FULL_SCALE_VOLTAGE_V      (59.599)   // 24.0 Example for boostxldrv8301_revB typical usage and the Anaheim motor
 
 //! \brief Defines the maximum voltage at the input to the AD converter
 //! \brief The value that will be represented by the maximum ADC input (3.3V) and conversion (0FFFh)
 //! \brief Hardware dependent, this should be based on the voltage sensing and scaling to the ADC input
-#define USER_ADC_FULL_SCALE_VOLTAGE_V       (55.96)      // 26.314 boostxldrv8301_revB voltage scaling
+#define USER_ADC_FULL_SCALE_VOLTAGE_V       (59.599)//55.96)      // 26.314 boostxldrv8301_revB voltage scaling
 
 //! \brief Defines the voltage scale factor for the system
 //! \brief Compile time calculation for scale factor (ratio) used throughout the system
@@ -100,7 +100,7 @@ extern "C" {
 //! \brief All currents are converted into (pu) based on the ratio to this value
 //! \brief WARNING: this value MUST be larger than the maximum current readings that you are expecting from the motor or the reading will roll over to 0, creating a control issue 
 //peak value. must be >=USER_ADC_FULL_SCALE_CURRENT_A / 2
-#define USER_IQ_FULL_SCALE_CURRENT_A         (80.0) // 20.0 Example for boostxldrv8301_revB typical usage
+#define USER_IQ_FULL_SCALE_CURRENT_A         (62.0) // 20.0 Example for boostxldrv8301_revB typical usage
 
 //! \brief Defines the maximum current at the AD converter
 //! \brief The value that will be represented by the maximum ADC input (3.3V) and conversion (0FFFh)
@@ -298,7 +298,7 @@ extern "C" {
 // **************************************************************************
 //! \brief Defines the analog voltage filter pole location, Hz
 //! \brief Must match the hardware filter for Vph
-#define USER_VOLTAGE_FILTER_POLE_Hz  	(731.4)   // 364.682, value for boostxldrv8301_revB hardware
+#define USER_VOLTAGE_FILTER_POLE_Hz  	(815.4)//731.4)   // 364.682, value for boostxldrv8301_revB hardware
 
 //! \brief Defines the analog voltage filter pole location, rad/s
 //! \brief Compile time calculation from Hz to rad/s
@@ -681,7 +681,7 @@ v/hz=0.2976 .297 .29
 #define USER_MOTOR_MAGNETIZING_CURRENT  (NULL)
 #define USER_MOTOR_RES_EST_CURRENT      (4.0)
 #define USER_MOTOR_IND_EST_CURRENT      (-1)
-#define USER_MOTOR_MAX_CURRENT          (USER_IQ_FULL_SCALE_CURRENT_A)
+#define USER_MOTOR_MAX_CURRENT          (USER_IQ_FULL_SCALE_CURRENT_A * 0.5)
 #define USER_MOTOR_FLUX_EST_FREQ_Hz     (20.0)
 
 #define USER_MOTOR_FREQ_LOW               (20.0)          // Hz - suggested to set to 10% of rated motor frequency
