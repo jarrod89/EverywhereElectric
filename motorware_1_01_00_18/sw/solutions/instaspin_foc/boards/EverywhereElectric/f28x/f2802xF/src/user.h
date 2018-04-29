@@ -69,6 +69,17 @@ extern "C" {
 // **************************************************************************
 // the defines
 
+//! \brief Application Specific Constants
+// **************************************************************************
+//! \brief Defines bus voltage at which the controller should start to reduce current
+#define targetVbat (3.1*14/1000)
+
+//! \brief Defines the bus voltage where the controller should stop all current
+#define VbatCutoff (2.9*14/1000)
+
+//! \brief Defines the upper and lower voltage outputs of throttle sensor
+#define ThrottleMin (0.154)
+#define ThrottleMax (0.824)
 
 //! \brief CURRENTS AND VOLTAGES
 // **************************************************************************

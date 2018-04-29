@@ -527,7 +527,7 @@ void main(void)
                 gMotorVars.Flag_Run_Identify = false;
             }
             // Under-voltage protection
-            if(gMotorVars.VdcBus_kV < _IQ(3.0*14/1000)) //cutoff at 3V/cell
+            if(gMotorVars.VdcBus_kV < _IQ(VbatCutoff)) //cutoff at 3V/cell
             {
                 HAL_setGpioHigh(halHandle,HAL_Gpio_LED2);
                 if(UVPctr)
@@ -543,14 +543,17 @@ void main(void)
                 faultFlags |= UVP;
                 gMotorVars.Flag_Run_Identify = false; //shut down inverter
             }
-            // Read potentiometer// set target speed max=0.818, min=0.148
-			gPotentiometer = _IQmpy( ( HAL_readPotentiometerData(halHandle) /*),_IQ(1.0));*/- _IQ(0.154) ), _IQ((USER_MOTOR_MAX_CURRENT / USER_IQ_FULL_SCALE_CURRENT_A)/(0.824-0.154))); //re scale to remove deadbands in throttle sensor
+            // Read potentiometer
+            //re scale to remove deadbands in throttle sensor
+			gPotentiometer = _IQmpy( ( HAL_readPotentiometerData(halHandle) - _IQ(ThrottleMin) ), _IQ((1)/(ThrottleMax-ThrottleMin)));
 			if(gPotentiometer > _IQ(1))
 				gPotentiometer = _IQ(1);
 			if(gPotentiometer < _IQ(0))
 				gPotentiometer = _IQ(0);
-			// set target speed
-            gMotorVars.SpeedRef_pu = gPotentiometer;//_IQmpy(gMotorVars.SpeedRef_krpm, gSpeed_krpm_to_pu_sf);
+			// set motor current
+
+			_iq CurrentAllowed_pu = _IQ(USER_MOTOR_MAX_CURRENT / USER_IQ_FULL_SCALE_CURRENT_A);
+            gMotorVars.SpeedRef_pu = _IQmpy( gPotentiometer, CurrentAllowed_pu );//_IQmpy(gMotorVars.SpeedRef_krpm, gSpeed_krpm_to_pu_sf);
 
             #ifdef DRV8301_SPI
                 HAL_writeDrvData(halHandle,&gDrvSpi8301Vars);
