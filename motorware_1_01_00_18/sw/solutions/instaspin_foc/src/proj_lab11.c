@@ -161,6 +161,7 @@ _iq gSpeed_hz_to_krpm_sf = _IQ(60.0 / (float_t)USER_MOTOR_NUM_POLE_PAIRS
 
 //Everywhere Electric variables
 _iq gPotentiometer = _IQ(0.0);
+_iq CurrentAllowed_pu = _IQ(0);
 unsigned int faultFlags = 0;
 #define NOFAULT 0
 #define UVP 1
@@ -535,7 +536,7 @@ void main(void)
             }else
             {
                 HAL_setGpioLow(halHandle,HAL_Gpio_LED2);
-                UVPctr = 100;
+                UVPctr = 1000;
             }
 
             if(UVPctr==0)
@@ -550,9 +551,37 @@ void main(void)
 				gPotentiometer = _IQ(1);
 			if(gPotentiometer < _IQ(0))
 				gPotentiometer = _IQ(0);
-			// set motor current
 
-			_iq CurrentAllowed_pu = _IQ(USER_MOTOR_MAX_CURRENT / USER_IQ_FULL_SCALE_CURRENT_A);
+			// set motor current scaling factor based on Vdc level
+			_iq CurrentAllowed_pu_Vbus;
+			if(gMotorVars.VdcBus_kV < _IQ(TargetVbat))
+			{
+			    HAL_setGpioHigh(halHandle,HAL_Gpio_LED3);
+			    //proportional backdown of motor current
+			    CurrentAllowed_pu_Vbus = _IQ(1) - _IQmpy(_IQ(TargetVbat) - gMotorVars.VdcBus_kV, _IQ(1/(TargetVbat-TargetVbatMin)));
+			}
+			else
+			    HAL_setGpioLow(halHandle,HAL_Gpio_LED3);
+
+			//calculate bus current, limit to 30A
+		    //https://e2e.ti.com/support/microcontrollers/c2000/f/902/p/470634/1693712#1693712
+            _iq CurrentAllowed_pu_Ibus;
+            CurrentAllowed_pu_Ibus = _IQ(1);
+
+			//decay back to full power
+			CurrentAllowed_pu += _IQ(Current_allowed_slope);
+			//act on backdown
+			if (CurrentAllowed_pu_Vbus <= CurrentAllowed_pu)
+			                CurrentAllowed_pu = CurrentAllowed_pu_Vbus;
+			if (CurrentAllowed_pu_Ibus <= CurrentAllowed_pu)
+			                CurrentAllowed_pu = CurrentAllowed_pu_Ibus;
+			//limit range
+            if(CurrentAllowed_pu < _IQ(0))
+                CurrentAllowed_pu = _IQ(0);
+            if(CurrentAllowed_pu > _IQ(1))
+                CurrentAllowed_pu = _IQ(1);
+
+            //Scale throttle input by current allowed
             gMotorVars.SpeedRef_pu = _IQmpy( gPotentiometer, CurrentAllowed_pu );//_IQmpy(gMotorVars.SpeedRef_krpm, gSpeed_krpm_to_pu_sf);
 
             #ifdef DRV8301_SPI

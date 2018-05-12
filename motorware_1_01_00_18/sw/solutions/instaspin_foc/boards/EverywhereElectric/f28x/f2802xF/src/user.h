@@ -72,11 +72,12 @@ extern "C" {
 //! \brief Application Specific Constants
 // **************************************************************************
 //! \brief Defines bus voltage at which the controller should start to reduce current
-#define targetVbat (3.1*14/1000)
-
+#define TargetVbat (3.1*14/1000)
+#define TargetVbatMin (2.95*14/1000)
 //! \brief Defines the bus voltage where the controller should stop all current
 #define VbatCutoff (2.9*14/1000)
-
+// 1khz control loop, 0.001 * 1k = 100% / 1s
+#define Current_allowed_slope (0.001)
 //! \brief Defines the upper and lower voltage outputs of throttle sensor
 #define ThrottleMin (0.154)
 #define ThrottleMax (0.824)
@@ -101,7 +102,7 @@ extern "C" {
 //! \brief Defines the maximum voltage at the input to the AD converter
 //! \brief The value that will be represented by the maximum ADC input (3.3V) and conversion (0FFFh)
 //! \brief Hardware dependent, this should be based on the voltage sensing and scaling to the ADC input
-#define USER_ADC_FULL_SCALE_VOLTAGE_V       (59.599)//55.96)      // 26.314 boostxldrv8301_revB voltage scaling
+#define USER_ADC_FULL_SCALE_VOLTAGE_V       (59.599)//with parallel 68k and 4.7k with 75k divider, was 55.96      // 26.314 boostxldrv8301_revB voltage scaling
 
 //! \brief Defines the voltage scale factor for the system
 //! \brief Compile time calculation for scale factor (ratio) used throughout the system
@@ -111,13 +112,13 @@ extern "C" {
 //! \brief All currents are converted into (pu) based on the ratio to this value
 //! \brief WARNING: this value MUST be larger than the maximum current readings that you are expecting from the motor or the reading will roll over to 0, creating a control issue 
 //peak value. must be >=USER_ADC_FULL_SCALE_CURRENT_A / 2
-#define USER_IQ_FULL_SCALE_CURRENT_A         (62.0) // 20.0 Example for boostxldrv8301_revB typical usage
+#define USER_IQ_FULL_SCALE_CURRENT_A         (96.217)//62.0) // 20.0 Example for boostxldrv8301_revB typical usage
 
 //! \brief Defines the maximum current at the AD converter
 //! \brief The value that will be represented by the maximum ADC input (3.3V) and conversion (0FFFh)
 //! \brief Hardware dependent, this should be based on the current sensing and scaling to the ADC input
 //Peak to peak! ie +/-61A = 122A
-#define USER_ADC_FULL_SCALE_CURRENT_A        (122.22)  // 33.0 boostxldrv8301_revB current scaling
+#define USER_ADC_FULL_SCALE_CURRENT_A        (96.217*2) // with parallel 47k and 27k with 1k on diff amp. was 122.22)  // 33.0 boostxldrv8301_revB current scaling
 
 //! \brief Defines the current scale factor for the system
 //! \brief Compile time calculation for scale factor (ratio) used throughout the system
@@ -214,7 +215,7 @@ extern "C" {
 
 //! \brief Defines the number of controller clock ticks per speed controller clock tick
 //! \brief Relationship of controller clock rate to speed loop rate
-#define USER_NUM_CTRL_TICKS_PER_SPEED_TICK  (15)   // 15 Typical to match PWM, ex: 15KHz PWM, controller, and current loop, 1KHz speed loop
+#define USER_NUM_CTRL_TICKS_PER_SPEED_TICK  (10)   // 15 Typical to match PWM, ex: 15KHz PWM, controller, and current loop, 1KHz speed loop
 
 //! \brief Defines the number of controller clock ticks per trajectory clock tick
 //! \brief Relationship of controller clock rate to trajectory loop rate
@@ -692,7 +693,7 @@ v/hz=0.2976 .297 .29
 #define USER_MOTOR_MAGNETIZING_CURRENT  (NULL)
 #define USER_MOTOR_RES_EST_CURRENT      (4.0)
 #define USER_MOTOR_IND_EST_CURRENT      (-1)
-#define USER_MOTOR_MAX_CURRENT          (USER_IQ_FULL_SCALE_CURRENT_A * 0.5)
+#define USER_MOTOR_MAX_CURRENT          (USER_IQ_FULL_SCALE_CURRENT_A * 0.5) //ignored
 #define USER_MOTOR_FLUX_EST_FREQ_Hz     (20.0)
 
 #define USER_MOTOR_FREQ_LOW               (20.0)          // Hz - suggested to set to 10% of rated motor frequency
