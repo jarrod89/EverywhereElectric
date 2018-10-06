@@ -162,6 +162,8 @@ _iq gSpeed_hz_to_krpm_sf = _IQ(60.0 / (float_t)USER_MOTOR_NUM_POLE_PAIRS
 //Everywhere Electric variables
 _iq gPotentiometer = _IQ(0.0);
 _iq CurrentAllowed_pu = _IQ(0);
+_iq CurrentAllowed_pu_Vbus;
+_iq CurrentAllowed_pu_Ibus;
 unsigned int faultFlags = 0;
 #define NOFAULT 0
 #define UVP 1
@@ -553,19 +555,23 @@ void main(void)
 				gPotentiometer = _IQ(0);
 
 			// set motor current scaling factor based on Vdc level
-			_iq CurrentAllowed_pu_Vbus;
-			if(gMotorVars.VdcBus_kV < _IQ(TargetVbat))
+			if( gMotorVars.VdcBus_kV < _IQ(TargetVbatMin) )
+			    CurrentAllowed_pu_Vbus = _IQ(0);
+			else
+			if(gMotorVars.VdcBus_kV < _IQ(TargetVbat) )
 			{
 			    HAL_setGpioHigh(halHandle,HAL_Gpio_LED3);
 			    //proportional backdown of motor current
 			    CurrentAllowed_pu_Vbus = _IQ(1) - _IQmpy(_IQ(TargetVbat) - gMotorVars.VdcBus_kV, _IQ(1/(TargetVbat-TargetVbatMin)));
 			}
 			else
+			{
 			    HAL_setGpioLow(halHandle,HAL_Gpio_LED3);
-
+			    CurrentAllowed_pu_Vbus = _IQ(1);
+			}
 			//calculate bus current, limit to 30A
 		    //https://e2e.ti.com/support/microcontrollers/c2000/f/902/p/470634/1693712#1693712
-            _iq CurrentAllowed_pu_Ibus;
+
             CurrentAllowed_pu_Ibus = _IQ(1);
 
 			//decay back to full power
